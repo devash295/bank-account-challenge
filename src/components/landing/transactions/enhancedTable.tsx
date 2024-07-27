@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -8,64 +8,40 @@ import {
   TableRow,
   Paper,
   TableSortLabel,
+  CircularProgress,
 } from "@mui/material";
+import axios from "axios";
 import TransactionIcon from "../../icons/transactionIcon";
-import { TransactionStatus } from "../../../types/enums";
 import StatusButton from "./statusButton";
-
-interface RowData {
-  id: number;
-  date: string;
-  recipient: string;
-  amount: number;
-  type: string;
-  status: TransactionStatus;
-}
-
-// Sample data
-const rows: RowData[] = [
-  {
-    id: 1,
-    date: "July 28, 2024, 4:40 PM",
-    recipient: "Jordyn",
-    amount: 12821.98,
-    type: "Debit",
-    status: TransactionStatus.COMPLETED,
-  },
-  {
-    id: 2,
-    date: "July 28, 2023, 4:50 PM",
-    recipient: "Marcus",
-    amount: 1228.98,
-    type: "Credit",
-    status: TransactionStatus.PENDING,
-  },
-  {
-    id: 3,
-    date: "July 28, 2024, 4:10 PM",
-    recipient: "Jordyn",
-    amount: 112328.98,
-    type: "Debit",
-    status: TransactionStatus.CANCELLED,
-  },
-  {
-    id: 4,
-    date: "July 27, 2024, 4:30 PM",
-    recipient: "Marcus",
-    amount: 12128.98,
-    type: "Credit",
-    status: TransactionStatus.PENDING,
-  },
-  // Add more rows as needed
-];
+import { Transaction } from "../../../types/transaction";
+import { TransactionType } from "../../../types/enums";
 
 type Order = "asc" | "desc";
 
 const EnhancedTable: React.FC = () => {
   const [order, setOrder] = useState<Order>("asc");
-  const [orderBy, setOrderBy] = useState<keyof RowData>("date");
+  const [orderBy, setOrderBy] = useState<keyof Transaction>("date");
+  const [rows, setRows] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleRequestSort = (property: keyof RowData) => {
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/transaction"
+        );
+        setRows(response.data);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  const handleRequestSort = (property: keyof Transaction) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -74,12 +50,20 @@ const EnhancedTable: React.FC = () => {
   const sortedRows = rows.sort((a, b) => {
     if (orderBy === "amount") {
       return order === "asc" ? a.amount - b.amount : b.amount - a.amount;
+    } else if (orderBy === "date") {
+      return order === "asc"
+        ? new Date(a.date).getTime() - new Date(b.date).getTime()
+        : new Date(b.date).getTime() - new Date(a.date).getTime();
     } else {
       return order === "asc"
         ? a[orderBy].toString().localeCompare(b[orderBy].toString())
         : b[orderBy].toString().localeCompare(a[orderBy].toString());
     }
   });
+
+  if (loading) {
+    return <CircularProgress />;
+  }
 
   return (
     <TableContainer component={Paper}>
@@ -88,9 +72,9 @@ const EnhancedTable: React.FC = () => {
           <TableRow>
             <TableCell>
               <TableSortLabel
-                active={orderBy === "id"}
-                direction={orderBy === "id" ? order : "asc"}
-                onClick={() => handleRequestSort("id")}
+                active={orderBy === "_id"}
+                direction={orderBy === "_id" ? order : "asc"}
+                onClick={() => handleRequestSort("_id")}
               >
                 <b>ID Invoice</b>
               </TableSortLabel>
@@ -110,7 +94,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "recipient" ? order : "asc"}
                 onClick={() => handleRequestSort("recipient")}
               >
-                <b> Recipient</b>
+                <b>Recipient</b>
               </TableSortLabel>
             </TableCell>
             <TableCell>
@@ -119,7 +103,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "amount" ? order : "asc"}
                 onClick={() => handleRequestSort("amount")}
               >
-                <b> Amount</b>
+                <b>Amount</b>
               </TableSortLabel>
             </TableCell>
             <TableCell>
@@ -144,17 +128,31 @@ const EnhancedTable: React.FC = () => {
         </TableHead>
         <TableBody>
           {sortedRows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>#{row.id}</TableCell>
-              <TableCell>{row.date}</TableCell>
-              <TableCell>{row.recipient}</TableCell>
-              <TableCell>${row.amount}</TableCell>
+            <TableRow key={row._id}>
+              <TableCell>#{row._id}</TableCell>
+              <TableCell>{new Date(row.date).toLocaleString()}</TableCell>
               <TableCell>
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  {row.type === "Debit" ? (
-                    <TransactionIcon color="red" />
-                  ) : (
+                  <img
+                    src={row.recipient.avatar}
+                    alt={row.recipient.name}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      marginRight: 8,
+                    }}
+                  />
+                  {row.recipient.name}
+                </div>
+              </TableCell>
+              <TableCell>${row.amount.toFixed(2)}</TableCell>
+              <TableCell>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  {row.type === TransactionType.DEPOSIT ? (
                     <TransactionIcon color="green" />
+                  ) : (
+                    <TransactionIcon color="red" />
                   )}
                   <span style={{ marginLeft: "8px" }}>{row.type}</span>
                 </div>

@@ -1,7 +1,7 @@
 import { TransactionType, TransactionStatus } from "./enums";
 
 export type Transaction = {
-  id: string;
+  _id: string;
   date: string;
   type: TransactionType;
   amount: number;
@@ -11,4 +11,5 @@ export type Transaction = {
     name: string;
     avatar: string;
   };
+  iban: string;
 };
