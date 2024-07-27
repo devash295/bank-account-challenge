@@ -10,6 +10,8 @@ import {
   TableSortLabel,
 } from "@mui/material";
 import TransactionIcon from "../../icons/transactionIcon";
+import { TransactionStatus } from "../../../types/enums";
+import StatusButton from "./statusButton";
 
 interface RowData {
   id: number;
@@ -17,7 +19,7 @@ interface RowData {
   recipient: string;
   amount: number;
   type: string;
-  status: string;
+  status: TransactionStatus;
 }
 
 // Sample data
@@ -26,17 +28,33 @@ const rows: RowData[] = [
     id: 1,
     date: "July 28, 2024, 4:40 PM",
     recipient: "Jordyn",
-    amount: 128.98,
-    type: "Outcome",
-    status: "Canceled",
+    amount: 12821.98,
+    type: "Debit",
+    status: TransactionStatus.COMPLETED,
   },
   {
     id: 2,
-    date: "July 28, 2024, 4:40 PM",
+    date: "July 28, 2023, 4:50 PM",
     recipient: "Marcus",
-    amount: 128.98,
-    type: "Income",
-    status: "Pending",
+    amount: 1228.98,
+    type: "Credit",
+    status: TransactionStatus.PENDING,
+  },
+  {
+    id: 3,
+    date: "July 28, 2024, 4:10 PM",
+    recipient: "Jordyn",
+    amount: 112328.98,
+    type: "Debit",
+    status: TransactionStatus.CANCELLED,
+  },
+  {
+    id: 4,
+    date: "July 27, 2024, 4:30 PM",
+    recipient: "Marcus",
+    amount: 12128.98,
+    type: "Credit",
+    status: TransactionStatus.PENDING,
   },
   // Add more rows as needed
 ];
@@ -74,7 +92,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "id" ? order : "asc"}
                 onClick={() => handleRequestSort("id")}
               >
-                ID Invoice
+                <b>ID Invoice</b>
               </TableSortLabel>
             </TableCell>
             <TableCell>
@@ -83,7 +101,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "date" ? order : "asc"}
                 onClick={() => handleRequestSort("date")}
               >
-                Date
+                <b>Date</b>
               </TableSortLabel>
             </TableCell>
             <TableCell>
@@ -92,7 +110,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "recipient" ? order : "asc"}
                 onClick={() => handleRequestSort("recipient")}
               >
-                Recipient
+                <b> Recipient</b>
               </TableSortLabel>
             </TableCell>
             <TableCell>
@@ -101,7 +119,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "amount" ? order : "asc"}
                 onClick={() => handleRequestSort("amount")}
               >
-                Amount
+                <b> Amount</b>
               </TableSortLabel>
             </TableCell>
             <TableCell>
@@ -110,7 +128,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "type" ? order : "asc"}
                 onClick={() => handleRequestSort("type")}
               >
-                Type
+                <b>Type</b>
               </TableSortLabel>
             </TableCell>
             <TableCell>
@@ -119,7 +137,7 @@ const EnhancedTable: React.FC = () => {
                 direction={orderBy === "status" ? order : "asc"}
                 onClick={() => handleRequestSort("status")}
               >
-                Status
+                <b>Status</b>
               </TableSortLabel>
             </TableCell>
           </TableRow>
@@ -127,13 +145,13 @@ const EnhancedTable: React.FC = () => {
         <TableBody>
           {sortedRows.map((row) => (
             <TableRow key={row.id}>
-              <TableCell>{row.id}</TableCell>
+              <TableCell>#{row.id}</TableCell>
               <TableCell>{row.date}</TableCell>
               <TableCell>{row.recipient}</TableCell>
-              <TableCell>{row.amount}</TableCell>
+              <TableCell>${row.amount}</TableCell>
               <TableCell>
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  {row.type === "Outcome" ? (
+                  {row.type === "Debit" ? (
                     <TransactionIcon color="red" />
                   ) : (
                     <TransactionIcon color="green" />
@@ -141,7 +159,9 @@ const EnhancedTable: React.FC = () => {
                   <span style={{ marginLeft: "8px" }}>{row.type}</span>
                 </div>
               </TableCell>
-              <TableCell>{row.status}</TableCell>
+              <TableCell>
+                <StatusButton status={row.status} />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
