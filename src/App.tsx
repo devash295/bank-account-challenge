@@ -1,31 +1,48 @@
-import React from 'react';
-import TransactionIcon from './components/icons/transactionIcon';
-import TransferMoneyIcon from './components/icons/transferMoneyIcon';
-import WithdrawMoneyIcon from './components/icons/withdrawMoneyIcon';
-import DepositMoneyIcon from './components/icons/depositMoneyIcon';
+import React, { useState } from "react";
+
+import TopSection from "./components/landing/header/topSection";
+import TableHeaderAndFilters from "./components/landing/tableHeaderAndFilters";
+import EnhancedTable from "./components/landing/transactions/enhancedTable";
 
 function App() {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggleOpen = () => setIsOpen(false);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={''} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <TransactionIcon color='red'/>
-        <TransactionIcon color='green'/>
-        <TransferMoneyIcon/>
-        <WithdrawMoneyIcon/>
-        <DepositMoneyIcon/>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div
+      style={{
+        height: "100vh",
+        width: "100vw",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+      }}
+    >
+      <div
+        style={{
+          width: "80vw",
+          maxWidth: "80vw",
+          maxHeight: "100%",
+          alignSelf: "center",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+        }}
+      >
+        <TopSection />
+        <TableHeaderAndFilters />
+        <EnhancedTable />
+        {/* <TransactionIcon color="red" />
+      <TransactionIcon color="green" />
+      <TransferMoneyIcon />
+      <WithdrawMoneyIcon />
+      <DepositMoneyIcon />
+      <button onClick={() => setIsOpen(!isOpen)}>Open Modal</button>
+      <TransactionModal
+        action={TransactionType.DEPOSIT}
+        isOpen={isOpen}
+        toggleOpen={toggleOpen}
+      /> */}
+      </div>
     </div>
   );
 }

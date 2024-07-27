@@ -1,11 +1,11 @@
 export enum TransactionType {
-    'WITHDRAW' = 'WITHDRAW',
-    'DEPOSIT' = 'DEPOSIT',
-    'TRANSFER' = 'TRANSFER',
+    WITHDRAW = 'Withdraw',
+    DEPOSIT = 'Deposit',
+    TRANSFER = 'Transfer',
 }
 
 export enum TransactionStatus {
-    'PENDING' = 'PENDING',
-    'COMPLETED' = 'COMPLETED',
-    'CANCELLED' = 'CANCELLED',
+    PENDING = 'Pending',
+    COMPLETED = 'Completed',
+    CANCELLED = 'Cancelled',
 }
