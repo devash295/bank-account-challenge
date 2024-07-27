@@ -9,16 +9,25 @@ const StatusButton = (props: { status: TransactionStatus }) => {
       : props.status === TransactionStatus.CANCELLED
       ? customTheme.palette.secondary.dark
       : customTheme.palette.secondary.light;
+
   return (
     <Button
       variant="outlined"
-      style={{
+      sx={{
         fontSize: 12,
         minWidth: "100px",
         maxWidth: "100px",
-        borderRadius: 10,
+        borderRadius: "15px",
         border: `1px solid ${color}`,
         color: color,
+        pointerEvents: "none",
+        "&:hover": {
+          backgroundColor: "transparent",
+        },
+        "&:disabled": {
+          pointerEvents: "auto",
+          cursor: "default",
+        },
       }}
     >
       {props.status}
