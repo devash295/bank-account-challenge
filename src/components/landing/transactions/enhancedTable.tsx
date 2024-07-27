@@ -12,13 +12,25 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import TransactionIcon from "../../icons/transactionIcon";
+import { TransactionType, TransactionStatus } from "../../../types/enums";
 import StatusButton from "./statusButton";
 import { Transaction } from "../../../types/transaction";
-import { TransactionType } from "../../../types/enums";
 
 type Order = "asc" | "desc";
 
-const EnhancedTable: React.FC = () => {
+type EnhancedTableProps = {
+  searchQuery: string;
+  filterTypes: TransactionType[];
+  startDate: Date | null;
+  endDate: Date | null;
+};
+
+const EnhancedTable: React.FC<EnhancedTableProps> = ({
+  searchQuery,
+  filterTypes,
+  startDate,
+  endDate,
+}) => {
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Transaction>("date");
   const [rows, setRows] = useState<Transaction[]>([]);
@@ -47,7 +59,21 @@ const EnhancedTable: React.FC = () => {
     setOrderBy(property);
   };
 
-  const sortedRows = rows.sort((a, b) => {
+  const filteredRows = rows.filter((row) => {
+    const matchesType =
+      filterTypes.length === 0 || filterTypes.includes(row.type);
+    const matchesDateRange =
+      (!startDate || new Date(row.date) >= startDate) &&
+      (!endDate || new Date(row.date) <= endDate);
+    const matchesSearchQuery =
+      (row.recipient?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        row._id?.includes(searchQuery)) ??
+      false;
+
+    return matchesType && matchesDateRange && matchesSearchQuery;
+  });
+
+  const sortedRows = filteredRows.sort((a, b) => {
     if (orderBy === "amount") {
       return order === "asc" ? a.amount - b.amount : b.amount - a.amount;
     } else if (orderBy === "date") {
@@ -56,8 +82,12 @@ const EnhancedTable: React.FC = () => {
         : new Date(b.date).getTime() - new Date(a.date).getTime();
     } else {
       return order === "asc"
-        ? a[orderBy].toString().localeCompare(b[orderBy].toString())
-        : b[orderBy].toString().localeCompare(a[orderBy].toString());
+        ? (a[orderBy]?.toString() ?? "").localeCompare(
+            b[orderBy]?.toString() ?? ""
+          )
+        : (b[orderBy]?.toString() ?? "").localeCompare(
+            a[orderBy]?.toString() ?? ""
+          );
     }
   });
 

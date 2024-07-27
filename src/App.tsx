@@ -1,12 +1,28 @@
 import React, { useState } from "react";
-
 import TopSection from "./components/landing/header/topSection";
 import TableHeaderAndFilters from "./components/landing/tableHeaderAndFilters";
 import EnhancedTable from "./components/landing/transactions/enhancedTable";
+import { TransactionType } from "./types/enums";
 
 function App() {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleOpen = () => setIsOpen(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterTypes, setFilterTypes] = useState<TransactionType[]>([]);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleFilterTypeChange = (types: TransactionType[]) => {
+    setFilterTypes(types);
+  };
+
+  const handleDateRangeChange = (start: Date | null, end: Date | null) => {
+    setStartDate(start);
+    setEndDate(end);
+  };
+
   return (
     <div
       style={{
@@ -29,19 +45,17 @@ function App() {
         }}
       >
         <TopSection />
-        <TableHeaderAndFilters />
-        <EnhancedTable />
-        {/* <TransactionIcon color="red" />
-      <TransactionIcon color="green" />
-      <TransferMoneyIcon />
-      <WithdrawMoneyIcon />
-      <DepositMoneyIcon />
-      <button onClick={() => setIsOpen(!isOpen)}>Open Modal</button>
-      <TransactionModal
-        action={TransactionType.DEPOSIT}
-        isOpen={isOpen}
-        toggleOpen={toggleOpen}
-      /> */}
+        <TableHeaderAndFilters
+          onSearchChange={handleSearchChange}
+          onFilterTypeChange={handleFilterTypeChange}
+          onDateRangeChange={handleDateRangeChange}
+        />
+        <EnhancedTable
+          searchQuery={searchQuery}
+          filterTypes={filterTypes}
+          startDate={startDate}
+          endDate={endDate}
+        />
       </div>
     </div>
   );

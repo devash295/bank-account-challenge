@@ -1,12 +1,15 @@
 import React from "react";
 import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "../icons/searchIcon";
-
-const SearchBar = () => {
+type SearchBarProps = {
+  onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+};
+const SearchBar = (props: SearchBarProps) => {
   return (
     <TextField
       variant="outlined"
       placeholder="Search here..."
+      onChange={props.onSearchChange}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">
