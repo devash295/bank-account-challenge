@@ -20,42 +20,45 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
       style={{
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
-        padding: "16px",
+        justifyContent: "space-between",
+        padding: "16px 0",
       }}
     >
       <span style={{ marginRight: "16px" }}>
         Showing {page * rowsPerPage + 1} to{" "}
         {Math.min(count, (page + 1) * rowsPerPage)} of {count} entries
       </span>
-      <Button
-        onClick={() => onPageChange(page - 1)}
-        disabled={page === 0}
-        style={{ margin: "0 8px" }}
-      >
-        Prev
-      </Button>
-      <Button
-        onClick={() => onPageChange(0)}
-        disabled={page === 0}
-        style={{ margin: "0 8px" }}
-      >
-        First
-      </Button>
-      <Button
-        onClick={() => onPageChange(totalPages - 1)}
-        disabled={page >= totalPages - 1}
-        style={{ margin: "0 8px" }}
-      >
-        Last
-      </Button>
-      <Button
-        onClick={() => onPageChange(page + 1)}
-        disabled={page >= totalPages - 1}
-        style={{ margin: "0 8px" }}
-      >
-        Next
-      </Button>
+      <div>
+        <Button
+          onClick={() => onPageChange(0)}
+          disabled={page === 0}
+          style={{ margin: "0 8px" }}
+        >
+          First
+        </Button>
+        <Button
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 0}
+          style={{ margin: "0 8px" }}
+        >
+          Prev
+        </Button>
+
+        <Button
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages - 1}
+          style={{ margin: "0 8px" }}
+        >
+          Next
+        </Button>
+        <Button
+          onClick={() => onPageChange(totalPages - 1)}
+          disabled={page >= totalPages - 1}
+          style={{ margin: "0 8px" }}
+        >
+          Last
+        </Button>
+      </div>
     </div>
   );
 };

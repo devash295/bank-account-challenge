@@ -18,6 +18,7 @@ const StatusButton = (props: { status: TransactionStatus }) => {
         minWidth: "100px",
         maxWidth: "100px",
         borderRadius: "15px",
+        padding: "0px 15px",
         border: `1px solid ${color}`,
         color: color,
         pointerEvents: "none",

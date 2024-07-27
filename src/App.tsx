@@ -26,7 +26,8 @@ function App() {
   return (
     <div
       style={{
-        height: "100vh",
+        marginTop: "5px",
+        minHeight: "100vh",
         width: "100vw",
         display: "flex",
         flexDirection: "column",

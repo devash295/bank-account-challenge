@@ -87,7 +87,7 @@ const TransactionModal = (props: TransactionModalProps) => {
       return;
     }
 
-    if (amount === null || amount <= 0 || amount > 50000) {
+    if (amount === null || amount <= 0 || amount > 5000000) {
       setAmountError(
         "Amount must be greater than 0 and less than or equal to 50000."
       );

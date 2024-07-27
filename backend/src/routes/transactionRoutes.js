@@ -19,24 +19,108 @@ transactionRouter.post("/create", (req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 
-// Get paginated transactions
-transactionRouter.get("/", (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+// Utility function to parse query parameters
+const parseQueryParams = (query) => {
+  const {
+    page = 1,
+    limit = 10,
+    orderBy = "date",
+    order = "desc",
+    type,
+    startDate,
+    endDate,
+    searchQuery,
+  } = query;
 
-  Transaction.find()
-    .sort({ date: -1 })
+  let parsedQuery = {};
+
+  if (type) {
+    const typesArray = type.split(","); // Split the type string into an array
+    parsedQuery.type = { $in: typesArray };
+  }
+
+  if (startDate || endDate) {
+    parsedQuery.date = {};
+    if (startDate) parsedQuery.date.$gte = new Date(startDate);
+    if (endDate) parsedQuery.date.$lte = new Date(endDate);
+  }
+
+  if (searchQuery) {
+    parsedQuery["recipient.name"] = { $regex: searchQuery, $options: "i" };
+  }
+
+  return {
+    page: Number(page),
+    limit: Number(limit),
+    orderBy,
+    order,
+    query: parsedQuery,
+  };
+};
+
+// Get filtered, searched, and paginated transactions
+transactionRouter.get("/", (req, res) => {
+  const { page, limit, orderBy, order, query } = parseQueryParams(req.query);
+
+  console.log("🔴🔴", JSON.stringify(query, null, 2));
+
+  Transaction.find(query)
+    .sort({ [orderBy]: order === "desc" ? -1 : 1 })
     .skip((page - 1) * limit)
-    .limit(Number(limit))
-    .then((transactions) => res.json(transactions))
+    .limit(limit)
+    .then((transactions) => {
+      if (transactions.length === 0) {
+        return res
+          .status(404)
+          .json({ noTransactionsFound: "No transactions found" });
+      }
+      res.json(transactions);
+    })
     .catch((err) =>
-      res.status(404).json({ noTransactionsFound: "No transactions found" })
+      res.status(500).json({ error: "Error fetching transactions" })
     );
 });
 
-//Get total number of transactions
+// Get total number of filtered and searched transactions
 transactionRouter.get("/totalTransactions", (req, res) => {
-  Transaction.countDocuments()
+  const { query } = parseQueryParams(req.query);
+
+  Transaction.countDocuments(query)
     .then((count) => res.json(count))
+    .catch((err) => res.status(404).json(err));
+});
+
+//Get total amount of money, if type is withdraw or transfer it should be subtracted from total, if its deposit it should be added
+transactionRouter.get("/totalAmount", (req, res) => {
+  Transaction.aggregate([
+    {
+      $match: { status: "Completed" },
+    },
+    {
+      $group: {
+        _id: null,
+        totalAmount: {
+          $sum: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$type", "Deposit"] }, then: "$amount" },
+                {
+                  case: { $eq: ["$type", "Withdraw"] },
+                  then: { $subtract: [0, "$amount"] },
+                },
+                {
+                  case: { $eq: ["$type", "Transfer"] },
+                  then: { $subtract: [0, "$amount"] },
+                },
+              ],
+              default: 0,
+            },
+          },
+        },
+      },
+    },
+  ])
+    .then((totalAmount) => res.json(totalAmount[0]?.totalAmount ?? 0))
     .catch((err) => res.status(404).json(err));
 });
 

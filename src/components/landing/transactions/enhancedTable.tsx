@@ -2,17 +2,18 @@ import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
-  TableCell,
   TableContainer,
   TableHead,
-  TableRow,
   Paper,
   TableSortLabel,
   CircularProgress,
+  styled,
+  TableRow,
+  TableCell,
 } from "@mui/material";
 import axios from "axios";
 import TransactionIcon from "../../icons/transactionIcon";
-import { TransactionType, TransactionStatus } from "../../../types/enums";
+import { TransactionType } from "../../../types/enums";
 import StatusButton from "./statusButton";
 import { Transaction } from "../../../types/transaction";
 import CustomPagination from "./customPagination";
@@ -26,13 +27,21 @@ type EnhancedTableProps = {
   endDate: Date | null;
 };
 
+export const StyledTableRow = styled(TableRow)({
+  padding: "4px 8px",
+});
+
+export const StyledTableCell = styled(TableCell)({
+  padding: "8px 8px",
+});
+
 const EnhancedTable: React.FC<EnhancedTableProps> = ({
   searchQuery,
   filterTypes,
   startDate,
   endDate,
 }) => {
-  const [order, setOrder] = useState<Order>("asc");
+  const [order, setOrder] = useState<Order>("desc");
   const [orderBy, setOrderBy] = useState<keyof Transaction>("date");
   const [rows, setRows] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,40 +49,98 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
   const rowsPerPage = 10; // Fixed number of rows per page
   const [totalTransactions, setTotalTransactions] = useState(0);
 
+  const fetchTotalTransactions = async (
+    type?: TransactionType[],
+    startDate?: Date | null,
+    endDate?: Date | null,
+    searchQuery?: string
+  ) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/transaction/totalTransactions",
+        {
+          params: {
+            type: type?.join(","),
+            startDate,
+            endDate,
+            searchQuery,
+          },
+        }
+      );
+      console.log({ searchQuery, response });
+      setTotalTransactions(response.data);
+    } catch (error) {
+      console.error("Error fetching total transactions:", error);
+    }
+  };
+
+  const fetchTransactions = async (
+    page: number,
+    rowsPerPage: number,
+    orderBy: keyof Transaction,
+    order: Order,
+    type?: TransactionType[],
+    startDate?: Date | null,
+    endDate?: Date | null,
+    searchQuery?: string
+  ) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/transaction/",
+        {
+          params: {
+            page: page + 1,
+            limit: rowsPerPage,
+            orderBy,
+            order,
+            type: type?.join(","),
+            startDate,
+            endDate,
+            searchQuery,
+          },
+        }
+      );
+      console.log("Fetching transactions with params: ", {
+        page: page + 1,
+        limit: rowsPerPage,
+        orderBy,
+        order,
+        type: type?.join(","),
+        startDate,
+        endDate,
+        searchQuery,
+      });
+      setRows(response.data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTotalTransactions = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/transaction/totalTransactions"
-        );
-        setTotalTransactions(response.data);
-      } catch (error) {
-        console.error("Error fetching total transactions:", error);
-      }
-    };
-
-    fetchTotalTransactions();
-  }, []);
-
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/transaction?page=${
-            page + 1
-          }&limit=${rowsPerPage}`
-        );
-        setRows(response.data);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, [page, rowsPerPage]);
+    fetchTotalTransactions(filterTypes, startDate, endDate, searchQuery);
+    fetchTransactions(
+      page,
+      rowsPerPage,
+      orderBy,
+      order,
+      filterTypes,
+      startDate,
+      endDate,
+      searchQuery
+    );
+  }, [
+    page,
+    rowsPerPage,
+    order,
+    orderBy,
+    filterTypes,
+    startDate,
+    endDate,
+    searchQuery,
+  ]);
 
   const handleRequestSort = (property: keyof Transaction) => {
     const isAsc = orderBy === property && order === "asc";
@@ -88,29 +155,9 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
       (!startDate || new Date(row.date) >= startDate) &&
       (!endDate || new Date(row.date) <= endDate);
     const matchesSearchQuery =
-      (row.recipient?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        row._id?.includes(searchQuery)) ??
+      row.recipient?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ??
       false;
-
     return matchesType && matchesDateRange && matchesSearchQuery;
-  });
-
-  const sortedRows = filteredRows.sort((a, b) => {
-    if (orderBy === "amount") {
-      return order === "asc" ? a.amount - b.amount : b.amount - a.amount;
-    } else if (orderBy === "date") {
-      return order === "asc"
-        ? new Date(a.date).getTime() - new Date(b.date).getTime()
-        : new Date(b.date).getTime() - new Date(a.date).getTime();
-    } else {
-      return order === "asc"
-        ? (a[orderBy]?.toString() ?? "").localeCompare(
-            b[orderBy]?.toString() ?? ""
-          )
-        : (b[orderBy]?.toString() ?? "").localeCompare(
-            a[orderBy]?.toString() ?? ""
-          );
-    }
   });
 
   if (loading) {
@@ -122,111 +169,115 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "_id"}
-                direction={orderBy === "_id" ? order : "asc"}
-                onClick={() => handleRequestSort("_id")}
-              >
-                <b>ID Invoice</b>
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "date"}
-                direction={orderBy === "date" ? order : "asc"}
-                onClick={() => handleRequestSort("date")}
-              >
-                <b>Date</b>
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "recipient"}
-                direction={orderBy === "recipient" ? order : "asc"}
-                onClick={() => handleRequestSort("recipient")}
-              >
-                <b>Recipient</b>
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "amount"}
-                direction={orderBy === "amount" ? order : "asc"}
-                onClick={() => handleRequestSort("amount")}
-              >
-                <b>Amount</b>
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "type"}
-                direction={orderBy === "type" ? order : "asc"}
-                onClick={() => handleRequestSort("type")}
-              >
-                <b>Type</b>
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "status"}
-                direction={orderBy === "status" ? order : "asc"}
-                onClick={() => handleRequestSort("status")}
-              >
-                <b>Status</b>
-              </TableSortLabel>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedRows.map((row) => (
-            <TableRow key={row._id}>
-              <TableCell>#{row._id}</TableCell>
-              <TableCell>{new Date(row.date).toLocaleString()}</TableCell>
-              <TableCell>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <img
-                    src={row.recipient.avatar}
-                    alt={row.recipient.name}
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: "50%",
-                      marginRight: 8,
-                    }}
-                  />
-                  {row.recipient.name}
-                </div>
-              </TableCell>
-              <TableCell>${row.amount.toFixed(2)}</TableCell>
-              <TableCell>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  {row.type === TransactionType.DEPOSIT ? (
-                    <TransactionIcon color="green" />
-                  ) : (
-                    <TransactionIcon color="red" />
-                  )}
-                  <span style={{ marginLeft: "8px" }}>{row.type}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <StatusButton status={row.status} />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <StyledTableRow>
+              <StyledTableCell>
+                <TableSortLabel
+                  active={orderBy === "_id"}
+                  direction={orderBy === "_id" ? order : "asc"}
+                  onClick={() => handleRequestSort("_id")}
+                >
+                  <b>ID Invoice</b>
+                </TableSortLabel>
+              </StyledTableCell>
+              <StyledTableCell>
+                <TableSortLabel
+                  active={orderBy === "date"}
+                  direction={orderBy === "date" ? order : "asc"}
+                  onClick={() => handleRequestSort("date")}
+                >
+                  <b>Date</b>
+                </TableSortLabel>
+              </StyledTableCell>
+              <StyledTableCell>
+                <TableSortLabel
+                  active={orderBy === "recipient"}
+                  direction={orderBy === "recipient" ? order : "asc"}
+                  onClick={() => handleRequestSort("recipient")}
+                >
+                  <b>Recipient</b>
+                </TableSortLabel>
+              </StyledTableCell>
+              <StyledTableCell>
+                <TableSortLabel
+                  active={orderBy === "amount"}
+                  direction={orderBy === "amount" ? order : "asc"}
+                  onClick={() => handleRequestSort("amount")}
+                >
+                  <b>Amount</b>
+                </TableSortLabel>
+              </StyledTableCell>
+              <StyledTableCell>
+                <TableSortLabel
+                  active={orderBy === "type"}
+                  direction={orderBy === "type" ? order : "asc"}
+                  onClick={() => handleRequestSort("type")}
+                >
+                  <b>Type</b>
+                </TableSortLabel>
+              </StyledTableCell>
+              <StyledTableCell>
+                <TableSortLabel
+                  active={orderBy === "status"}
+                  direction={orderBy === "status" ? order : "asc"}
+                  onClick={() => handleRequestSort("status")}
+                >
+                  <b>Status</b>
+                </TableSortLabel>
+              </StyledTableCell>
+            </StyledTableRow>
+          </TableHead>
+          <TableBody>
+            {filteredRows.map((row) => (
+              <StyledTableRow key={row._id}>
+                <StyledTableCell>#{row._id}</StyledTableCell>
+                <StyledTableCell>
+                  {new Date(row.date).toLocaleString()}
+                </StyledTableCell>
+                <StyledTableCell>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <img
+                      src={row.recipient.avatar}
+                      alt={row.recipient.name}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
+                        marginRight: 8,
+                      }}
+                    />
+                    {row.recipient.name}
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell>${row.amount.toFixed(2)}</StyledTableCell>
+                <StyledTableCell>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {row.type === TransactionType.DEPOSIT ? (
+                      <TransactionIcon color="green" />
+                    ) : (
+                      <TransactionIcon color="red" />
+                    )}
+                    <span style={{ marginLeft: "8px" }}>{row.type}</span>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell>
+                  <StatusButton status={row.status} />
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <CustomPagination
         count={totalTransactions}
         page={page}
         rowsPerPage={rowsPerPage}
         onPageChange={handleChangePage}
       />
-    </TableContainer>
+    </div>
   );
 };
 

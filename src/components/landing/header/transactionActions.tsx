@@ -10,22 +10,22 @@ import TransactionModal from "../../modal/TransactionModal";
 const ActionsContainer = styled("div")({
   display: "flex",
   flexDirection: "row",
-  justifyContent: "space-between",
+  justifyContent: "space-around", // Space around items
+  alignItems: "center",
   borderRadius: "8px",
-  width: "60%",
-  margin: "10px 30px",
+  width: "100%",
+  margin: "5px 10px", // Reduce margin
 });
 
 const ButtonTextContainer = styled("div")({
   display: "flex",
   flexDirection: "column",
-  width: "100%",
   alignItems: "center",
 });
 
 const StyledIconButton = styled(IconButton)({
-  maxHeight: "120px",
-  maxWidth: "120px",
+  maxHeight: "80px",
+  maxWidth: "80px",
 });
 
 const TransactionActions = () => {
