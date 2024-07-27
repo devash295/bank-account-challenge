@@ -15,6 +15,7 @@ import TransactionIcon from "../../icons/transactionIcon";
 import { TransactionType, TransactionStatus } from "../../../types/enums";
 import StatusButton from "./statusButton";
 import { Transaction } from "../../../types/transaction";
+import CustomPagination from "./customPagination";
 
 type Order = "asc" | "desc";
 
@@ -35,12 +36,33 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
   const [orderBy, setOrderBy] = useState<keyof Transaction>("date");
   const [rows, setRows] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 10; // Fixed number of rows per page
+  const [totalTransactions, setTotalTransactions] = useState(0);
+
+  useEffect(() => {
+    const fetchTotalTransactions = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/transaction/totalTransactions"
+        );
+        setTotalTransactions(response.data);
+      } catch (error) {
+        console.error("Error fetching total transactions:", error);
+      }
+    };
+
+    fetchTotalTransactions();
+  }, []);
 
   useEffect(() => {
     const fetchTransactions = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/transaction"
+          `http://localhost:5000/api/transaction?page=${
+            page + 1
+          }&limit=${rowsPerPage}`
         );
         setRows(response.data);
       } catch (error) {
@@ -51,7 +73,7 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
     };
 
     fetchTransactions();
-  }, []);
+  }, [page, rowsPerPage]);
 
   const handleRequestSort = (property: keyof Transaction) => {
     const isAsc = orderBy === property && order === "asc";
@@ -94,6 +116,10 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
   if (loading) {
     return <CircularProgress />;
   }
+
+  const handleChangePage = (newPage: number) => {
+    setPage(newPage);
+  };
 
   return (
     <TableContainer component={Paper}>
@@ -194,6 +220,12 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
           ))}
         </TableBody>
       </Table>
+      <CustomPagination
+        count={totalTransactions}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handleChangePage}
+      />
     </TableContainer>
   );
 };

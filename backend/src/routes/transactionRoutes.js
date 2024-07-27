@@ -19,14 +19,25 @@ transactionRouter.post("/create", (req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 
-// Get all transactions
+// Get paginated transactions
 transactionRouter.get("/", (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+
   Transaction.find()
     .sort({ date: -1 })
+    .skip((page - 1) * limit)
+    .limit(Number(limit))
     .then((transactions) => res.json(transactions))
     .catch((err) =>
       res.status(404).json({ noTransactionsFound: "No transactions found" })
     );
+});
+
+//Get total number of transactions
+transactionRouter.get("/totalTransactions", (req, res) => {
+  Transaction.countDocuments()
+    .then((count) => res.json(count))
+    .catch((err) => res.status(404).json(err));
 });
 
 // Search transactions
