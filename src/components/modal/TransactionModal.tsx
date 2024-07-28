@@ -97,23 +97,14 @@ const TransactionModal = (props: TransactionModalProps) => {
     const usersLength = users.length;
     const statusLength = Object.keys(TransactionStatus).length;
 
-    console.log("Users length:", usersLength);
-    console.log("Status length:", statusLength);
-
     const randomUserIndex = Math.floor(Math.random() * usersLength);
     const randomStatusIndex = Math.floor(Math.random() * statusLength);
-
-    console.log("Random user index:", randomUserIndex);
-    console.log("Random status index:", randomStatusIndex);
 
     const recipient =
       action === TransactionType.WITHDRAW
         ? currentUser
         : users[randomUserIndex];
     const status = Object.values(TransactionStatus)[randomStatusIndex];
-
-    console.log("Recipient:", recipient);
-    console.log("Status:", status);
 
     const transactionData = {
       date: new Date().toISOString(),
@@ -124,7 +115,6 @@ const TransactionModal = (props: TransactionModalProps) => {
       recipient: recipient,
       iban: iban,
     };
-    console.log(transactionData);
 
     setLoading(true);
 
@@ -133,7 +123,6 @@ const TransactionModal = (props: TransactionModalProps) => {
         "http://localhost:5000/api/transaction/create",
         transactionData
       );
-      console.log(response.data);
       toggleOpen();
     } catch (error) {
       console.error("Error creating transaction:", error);

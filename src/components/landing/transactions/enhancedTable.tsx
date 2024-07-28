@@ -67,7 +67,6 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
           },
         }
       );
-      console.log({ searchQuery, response });
       setTotalTransactions(response.data);
     } catch (error) {
       console.error("Error fetching total transactions:", error);
@@ -101,16 +100,6 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
           },
         }
       );
-      console.log("Fetching transactions with params: ", {
-        page: page + 1,
-        limit: rowsPerPage,
-        orderBy,
-        order,
-        type: type?.join(","),
-        startDate,
-        endDate,
-        searchQuery,
-      });
       setRows(response.data);
     } catch (error) {
       console.error("Error fetching transactions:", error);

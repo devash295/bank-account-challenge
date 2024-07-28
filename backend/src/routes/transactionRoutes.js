@@ -62,8 +62,6 @@ const parseQueryParams = (query) => {
 transactionRouter.get("/", (req, res) => {
   const { page, limit, orderBy, order, query } = parseQueryParams(req.query);
 
-  console.log("🔴🔴", JSON.stringify(query, null, 2));
-
   Transaction.find(query)
     .sort({ [orderBy]: order === "desc" ? -1 : 1 })
     .skip((page - 1) * limit)
