@@ -3,6 +3,7 @@ import AppLogo from "../../icons/appLogo";
 import { Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import useIsMobile from "../../../utils/isMobileHook";
 
 const AccountInfoContainer = styled("div")({
   display: "flex",
@@ -18,6 +19,8 @@ const Text = styled(Typography)({
 
 const AccountInfo = () => {
   const [amount, setAmount] = useState(0);
+  const isMobile = useIsMobile();
+
   useEffect(() => {
     const fetchTotalTransactions = async () => {
       try {
@@ -41,7 +44,7 @@ const AccountInfo = () => {
       <Text style={{ fontWeight: 600, marginTop: "10px", fontSize: 18 }}>
         ${amount}
       </Text>
-      <Text style={{ fontSize: 14 }}>+0.8% than last week</Text>
+      {!isMobile && <Text style={{ fontSize: 14 }}>+0.8% than last week</Text>}
     </AccountInfoContainer>
   );
 };

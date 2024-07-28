@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import React, { useState } from "react";
 import styled from "styled-components";
 import { IconButton, Typography } from "@mui/material";
@@ -6,8 +7,10 @@ import WithdrawMoneyIcon from "../../icons/withdrawMoneyIcon";
 import TransferMoneyIcon from "../../icons/transferMoneyIcon";
 import { TransactionType } from "../../../types/enums";
 import TransactionModal from "../../modal/TransactionModal";
+import { mediaQueries } from "../../../Theme";
+import useIsMobile from "../../../utils/isMobileHook";
 
-const ActionsContainer = styled("div")({
+const actionsContainer = mediaQueries({
   display: "flex",
   flexDirection: "row",
   justifyContent: "space-around", // Space around items
@@ -15,6 +18,7 @@ const ActionsContainer = styled("div")({
   borderRadius: "8px",
   width: "100%",
   margin: "5px 10px", // Reduce margin
+  gap: ["10px", 0, 0, 0],
 });
 
 const ButtonTextContainer = styled("div")({
@@ -28,11 +32,15 @@ const StyledIconButton = styled(IconButton)({
   maxWidth: "80px",
 });
 
+const typographyStyle = mediaQueries({
+  fontSize: ["12px", "14px", "16px", "18px"], // Adjust the font sizes as needed
+});
+
 const TransactionActions = () => {
   const [openModal, setOpenModal] = useState(false);
   const [transactionType, setTransactionType] =
     useState<TransactionType | null>(null);
-
+  const isMobile = useIsMobile();
   const handleOpenModal = (type: TransactionType) => {
     setTransactionType(type);
     setOpenModal(true);
@@ -45,14 +53,16 @@ const TransactionActions = () => {
 
   return (
     <>
-      <ActionsContainer>
+      <div css={actionsContainer}>
         <ButtonTextContainer>
           <StyledIconButton
             onClick={() => handleOpenModal(TransactionType.DEPOSIT)}
           >
             <DepositMoneyIcon />
           </StyledIconButton>
-          <Typography>Deposit Money</Typography>
+          <Typography css={typographyStyle}>
+            Deposit {!isMobile && "Money"}
+          </Typography>
         </ButtonTextContainer>
 
         <ButtonTextContainer>
@@ -61,7 +71,9 @@ const TransactionActions = () => {
           >
             <WithdrawMoneyIcon />
           </StyledIconButton>
-          <Typography>Withdraw Money</Typography>
+          <Typography css={typographyStyle}>
+            Withdraw {!isMobile && "Money"}
+          </Typography>
         </ButtonTextContainer>
 
         <ButtonTextContainer>
@@ -70,9 +82,11 @@ const TransactionActions = () => {
           >
             <TransferMoneyIcon />
           </StyledIconButton>
-          <Typography>Transfer Money</Typography>
+          <Typography css={typographyStyle}>
+            Transfer {!isMobile && "Money"}
+          </Typography>
         </ButtonTextContainer>
-      </ActionsContainer>
+      </div>
 
       {transactionType && (
         <TransactionModal

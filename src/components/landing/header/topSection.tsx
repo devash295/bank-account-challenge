@@ -1,5 +1,6 @@
+/** @jsxImportSource @emotion/react */
 import styled from "styled-components";
-import { customTheme } from "../../../Theme";
+import { customTheme, mediaQueries } from "../../../Theme";
 import AccountInfo from "./accountInfo";
 import TransactionActions from "./transactionActions";
 
@@ -10,7 +11,7 @@ const TopSectionWrapper = styled("div")({
   // padding: "0 20px",
 });
 
-const TopSectionContainer = styled("div")({
+const topSectionContainer = mediaQueries({
   display: "flex",
   flexDirection: "row",
   alignItems: "center",
@@ -23,7 +24,7 @@ const TopSectionContainer = styled("div")({
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
   padding: "5px 10px",
   marginBottom: "10px",
-  gap: "20px", // Add gap between items
+  gap: ["5px", "20px"], // Add gap between items
 });
 
 const AccountInfoWrapper = styled("div")({
@@ -41,14 +42,14 @@ const TransactionActionsWrapper = styled("div")({
 const TopSection = () => {
   return (
     <TopSectionWrapper>
-      <TopSectionContainer>
+      <div css={topSectionContainer}>
         <AccountInfoWrapper>
           <AccountInfo />
         </AccountInfoWrapper>
         <TransactionActionsWrapper>
           <TransactionActions />
         </TransactionActionsWrapper>
-      </TopSectionContainer>
+      </div>
     </TopSectionWrapper>
   );
 };
