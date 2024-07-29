@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import transactionRouter from "./routes/transactionRoutes.js";
+import transactionRouter from "./routes/transactionRoutes";
 import dotenv from "dotenv";
 import cors from "cors";
 
@@ -12,10 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 mongoose
-  .connect(process.env.MONGO_CONNECTION_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_CONNECTION_URI as string)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 

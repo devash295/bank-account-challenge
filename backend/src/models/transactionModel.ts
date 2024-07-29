@@ -1,8 +1,17 @@
-import mongoose from "mongoose";
-const Schema = mongoose.Schema;
+import mongoose, { Document, Schema } from "mongoose";
 
-// Create Schema
-const TransactionSchema = new Schema({
+export interface ITransaction extends Document {
+  date: Date;
+  recipient: {
+    name: string;
+    avatar: string;
+  };
+  amount: number;
+  type: "Withdraw" | "Deposit" | "Transfer";
+  balance: number;
+}
+
+const TransactionSchema: Schema = new Schema({
   date: {
     type: Date,
     default: Date.now,
@@ -29,6 +38,9 @@ const TransactionSchema = new Schema({
   balance: { type: Number, required: true },
 });
 
-const Transaction = mongoose.model("transactions", TransactionSchema);
+const Transaction = mongoose.model<ITransaction>(
+  "Transaction",
+  TransactionSchema
+);
 
 export default Transaction;

@@ -1,15 +1,14 @@
-import express from "express";
-import Transaction from "../models/transactionModel.js";
-
-const transactionRouter = express.Router();
+import { Request, Response } from "express";
+import Transaction, { ITransaction } from "../models/transactionModel";
 
 // Create a transaction
-transactionRouter.post("/create", async (req, res) => {
+export const createTransaction = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    // Get the latest transaction to determine the current balance
     const latestTransaction = await Transaction.findOne().sort({ date: -1 });
 
-    // Calculate the new balance
     let newBalance = 0;
     if (latestTransaction) {
       newBalance = latestTransaction.balance;
@@ -20,8 +19,7 @@ transactionRouter.post("/create", async (req, res) => {
       newBalance -= req.body.amount;
     }
 
-    // Create the new transaction with the calculated balance
-    const newTransaction = new Transaction({
+    const newTransaction: ITransaction = new Transaction({
       date: req.body.date,
       recipient: req.body.recipient,
       amount: req.body.amount,
@@ -33,10 +31,10 @@ transactionRouter.post("/create", async (req, res) => {
   } catch (err) {
     res.status(400).json(err);
   }
-});
+};
 
 // Utility function to parse query parameters
-const parseQueryParams = (query) => {
+const parseQueryParams = (query: any) => {
   const {
     page = 1,
     limit = 10,
@@ -48,7 +46,7 @@ const parseQueryParams = (query) => {
     searchQuery,
   } = query;
 
-  let parsedQuery = {};
+  let parsedQuery: any = {};
 
   if (type) {
     const typesArray = type.split(","); // Split the type string into an array
@@ -79,7 +77,7 @@ const parseQueryParams = (query) => {
 };
 
 // Get filtered, searched, and paginated transactions
-transactionRouter.get("/", (req, res) => {
+export const getTransactions = (req: Request, res: Response): void => {
   const { page, limit, orderBy, order, query } = parseQueryParams(req.query);
 
   Transaction.find(query)
@@ -97,19 +95,19 @@ transactionRouter.get("/", (req, res) => {
     .catch((err) =>
       res.status(500).json({ error: "Error fetching transactions" })
     );
-});
+};
 
 // Get total number of filtered and searched transactions
-transactionRouter.get("/totalTransactions", (req, res) => {
+export const getTotalTransactions = (req: Request, res: Response): void => {
   const { query } = parseQueryParams(req.query);
 
   Transaction.countDocuments(query)
     .then((count) => res.json(count))
     .catch((err) => res.status(404).json(err));
-});
+};
 
-//Get total amount of money, if type is withdraw or transfer it should be subtracted from total, if its deposit it should be added
-transactionRouter.get("/totalAmount", (req, res) => {
+// Get total amount of money
+export const getTotalAmount = (req: Request, res: Response): void => {
   Transaction.aggregate([
     {
       $group: {
@@ -137,12 +135,12 @@ transactionRouter.get("/totalAmount", (req, res) => {
   ])
     .then((totalAmount) => res.json(totalAmount[0]?.totalAmount ?? 0))
     .catch((err) => res.status(404).json(err));
-});
+};
 
 // Search transactions
-transactionRouter.post("/search", (req, res) => {
+export const searchTransactions = (req: Request, res: Response): void => {
   const { type, startDate, endDate } = req.body;
-  let query = {};
+  let query: any = {};
 
   if (type) {
     query.type = type;
@@ -160,6 +158,4 @@ transactionRouter.post("/search", (req, res) => {
     .catch((err) =>
       res.status(404).json({ noTransactionsFound: "No transactions found" })
     );
-});
-
-export default transactionRouter;
+};
