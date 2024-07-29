@@ -99,7 +99,7 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
           },
         }
       );
-      setRows(response.data);
+      if (response && response.data) setRows(response.data);
     } catch (error: any) {
       if (error.response.data.noTransactionsFound) {
         setRows([]);
