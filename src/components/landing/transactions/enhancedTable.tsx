@@ -99,12 +99,22 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
           },
         }
       );
-      if (response && response.data) setRows(response.data);
-    } catch (error: any) {
-      if (error.response.data.noTransactionsFound) {
+
+      if (response && response.data) {
+        setRows(response.data);
+      } else {
         setRows([]);
       }
-      // console.error("Error fetching transactions:", error);
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.noTransactionsFound
+      ) {
+        setRows([]);
+      } else {
+        console.error("Error fetching transactions:", error);
+      }
     } finally {
       setLoading(false);
     }
