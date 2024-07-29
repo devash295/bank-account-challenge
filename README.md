@@ -8,28 +8,24 @@ The architecture for the Bank Challenge project consists of a backend developed 
 
 ### Prerequisites
 
-1. **[Install Docker](https://docs.docker.com/engine/install/)**
-2. **[Install Node.js](https://nodejs.org/en)**
-3. **[Install npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
+1. **[Install Node.js](https://nodejs.org/en)**
+2. **[Install npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
 
 ### Backend Development
+
+Build the project using:
+
+> `npm run build`
+
+Start the server using:
+
+> `npm run start`
 
 #### Technologies
 
 1. Node.js with Express (TypeScript)
 2. MongoDB with Mongoose
-3. Running the Backend with Docker
-4. To run the backend using Docker, follow these steps:
-
-#### Executing Containerized Backend
-
-Ensure Docker is installed and running on your machine.
-
-Navigate to the root directory of your project where the Dockerfile and docker-compose.yml are located.
-
-Run the following command to build and start the Docker containers:
-
-> `docker-compose up --build`
+3. Running the Backend
 
 ### Frontend Development
 
@@ -42,7 +38,8 @@ Run the following command to build and start the Docker containers:
 
 To start frontend development, run the following commands in the root directory:
 
-> `npm install` > `npm run start`
+> `npm install`
+> `npm run start`
 
 ### Setting Up Prettier
 
