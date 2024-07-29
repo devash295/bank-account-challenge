@@ -4,19 +4,38 @@ import Transaction from "../models/transactionModel.js";
 const transactionRouter = express.Router();
 
 // Create a transaction
-transactionRouter.post("/create", (req, res) => {
-  const newTransaction = new Transaction({
-    date: req.body.date,
-    recipient: req.body.recipient,
-    amount: req.body.amount,
-    type: req.body.type,
-    status: req.body.status,
-  });
+// Create a transaction
+transactionRouter.post("/create", async (req, res) => {
+  try {
+    // Get the latest transaction to determine the current balance
+    const latestTransaction = await Transaction.findOne().sort({ date: -1 });
 
-  newTransaction
-    .save()
-    .then((transaction) => res.json(transaction))
-    .catch((err) => res.status(400).json(err));
+    // Calculate the new balance
+    let newBalance = 0;
+    if (latestTransaction) {
+      newBalance = latestTransaction.balance;
+    }
+    if (req.body.type === "Deposit") {
+      newBalance += req.body.amount;
+    } else if (req.body.type === "Withdraw" || req.body.type === "Transfer") {
+      newBalance -= req.body.amount;
+    }
+
+    console.log(newBalance);
+    // Create the new transaction with the calculated balance
+    const newTransaction = new Transaction({
+      date: req.body.date,
+      recipient: req.body.recipient,
+      amount: req.body.amount,
+      type: req.body.type,
+      balance: newBalance,
+    });
+    console.log("🟢🟢", newTransaction);
+    const savedTransaction = await newTransaction.save();
+    res.json(savedTransaction);
+  } catch (err) {
+    res.status(400).json(err);
+  }
 });
 
 // Utility function to parse query parameters
@@ -42,7 +61,11 @@ const parseQueryParams = (query) => {
   if (startDate || endDate) {
     parsedQuery.date = {};
     if (startDate) parsedQuery.date.$gte = new Date(startDate);
-    if (endDate) parsedQuery.date.$lte = new Date(endDate);
+    if (endDate) {
+      const adjustedEndDate = new Date(endDate);
+      adjustedEndDate.setHours(23, 59, 59, 999); // Set to end of the day
+      parsedQuery.date.$lte = adjustedEndDate;
+    }
   }
 
   if (searchQuery) {
@@ -91,9 +114,6 @@ transactionRouter.get("/totalTransactions", (req, res) => {
 //Get total amount of money, if type is withdraw or transfer it should be subtracted from total, if its deposit it should be added
 transactionRouter.get("/totalAmount", (req, res) => {
   Transaction.aggregate([
-    {
-      $match: { status: "Completed" },
-    },
     {
       $group: {
         _id: null,

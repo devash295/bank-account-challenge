@@ -26,11 +26,7 @@ const TransactionSchema = new Schema({
     required: true,
     enum: ["Withdraw", "Deposit", "Transfer"],
   },
-  status: {
-    type: String,
-    required: true,
-    enum: ["Completed", "Pending", "Cancelled"],
-  },
+  balance: { type: Number, required: true },
 });
 
 const Transaction = mongoose.model("transactions", TransactionSchema);
