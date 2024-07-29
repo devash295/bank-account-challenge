@@ -4,7 +4,6 @@ import Transaction from "../models/transactionModel.js";
 const transactionRouter = express.Router();
 
 // Create a transaction
-// Create a transaction
 transactionRouter.post("/create", async (req, res) => {
   try {
     // Get the latest transaction to determine the current balance
@@ -21,7 +20,6 @@ transactionRouter.post("/create", async (req, res) => {
       newBalance -= req.body.amount;
     }
 
-    console.log(newBalance);
     // Create the new transaction with the calculated balance
     const newTransaction = new Transaction({
       date: req.body.date,
@@ -30,7 +28,6 @@ transactionRouter.post("/create", async (req, res) => {
       type: req.body.type,
       balance: newBalance,
     });
-    console.log("🟢🟢", newTransaction);
     const savedTransaction = await newTransaction.save();
     res.json(savedTransaction);
   } catch (err) {

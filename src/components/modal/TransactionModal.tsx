@@ -82,19 +82,16 @@ const TransactionModal = (props: TransactionModalProps) => {
   const [loading, setLoading] = useState(false);
 
   const handleCreateTransaction = async () => {
-    console.log("Creating transaction...");
     if (action === TransactionType.TRANSFER && !IBAN_REGEX.test(iban)) {
       setIbanError("Invalid IBAN format.");
       return;
     }
-    console.log("Amount:", amount);
     if (amount === null || amount <= 0 || amount > 5000000) {
       setAmountError(
         "Amount must be greater than 0 and less than or equal to 50000."
       );
       return;
     }
-    console.log("Amount2:", amount);
     const usersLength = users.length;
 
     const randomUserIndex = Math.floor(Math.random() * usersLength);
@@ -103,7 +100,6 @@ const TransactionModal = (props: TransactionModalProps) => {
       action === TransactionType.TRANSFER
         ? users[randomUserIndex]
         : currentUser;
-    console.log("Recipient:", recipient);
     const transactionData = {
       date: new Date().toISOString(),
       type: action,
@@ -116,11 +112,10 @@ const TransactionModal = (props: TransactionModalProps) => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:5000/api/transaction/create",
         transactionData
       );
-      console.log("Transaction created:", response.data);
       toggleOpen();
     } catch (error) {
       console.error("Error creating transaction:", error);

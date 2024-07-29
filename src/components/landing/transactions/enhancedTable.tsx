@@ -42,7 +42,7 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
 }) => {
   const [order, setOrder] = useState<Order>("desc");
   const [orderBy, setOrderBy] = useState<keyof Transaction>("date");
-  const [rows, setRows] = useState<Transaction[]>([]);
+  const [filteredRows, setRows] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const rowsPerPage = 10; // Fixed number of rows per page
@@ -99,10 +99,12 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
           },
         }
       );
-      console.log("Fetched transactions:", response.data);
       setRows(response.data);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
+    } catch (error: any) {
+      if (error.response.data.noTransactionsFound) {
+        setRows([]);
+      }
+      // console.error("Error fetching transactions:", error);
     } finally {
       setLoading(false);
     }
@@ -136,18 +138,6 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-
-  const filteredRows = rows.filter((row) => {
-    const matchesType =
-      filterTypes.length === 0 || filterTypes.includes(row.type);
-    const matchesDateRange =
-      (!startDate || new Date(row.date) >= startDate) &&
-      (!endDate || new Date(row.date) <= endDate);
-    const matchesSearchQuery =
-      row.recipient?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ??
-      false;
-    return matchesType && matchesDateRange && matchesSearchQuery;
-  });
 
   if (loading) {
     return <CircularProgress />;
@@ -192,12 +182,12 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
               </StyledTableCell>
               <StyledTableCell>
                 <TableSortLabel>
-                  <b>Credit</b>
+                  <b>Debit</b>
                 </TableSortLabel>
               </StyledTableCell>
               <StyledTableCell>
                 <TableSortLabel>
-                  <b>Debit</b>
+                  <b>Credit</b>
                 </TableSortLabel>
               </StyledTableCell>
               <StyledTableCell>
@@ -239,12 +229,18 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
                   </div>
                 </StyledTableCell>
                 <StyledTableCell>
-                  {row.type !== TransactionType.DEPOSIT &&
-                    `$${row.amount.toFixed(2)}`}
+                  {row.type === TransactionType.DEPOSIT &&
+                    `$${row.amount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`}
                 </StyledTableCell>
                 <StyledTableCell>
-                  {row.type === TransactionType.DEPOSIT &&
-                    `$${row.amount.toFixed(2)}`}
+                  {row.type !== TransactionType.DEPOSIT &&
+                    `$${row.amount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`}
                 </StyledTableCell>
                 <StyledTableCell>
                   <div style={{ display: "flex", alignItems: "center" }}>
@@ -256,7 +252,12 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
                     <span style={{ marginLeft: "8px" }}>{row.type}</span>
                   </div>
                 </StyledTableCell>
-                <StyledTableCell>${row.balance}</StyledTableCell>
+                <StyledTableCell>
+                  {`$${row.balance.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`}
+                </StyledTableCell>
               </StyledTableRow>
             ))}
           </TableBody>

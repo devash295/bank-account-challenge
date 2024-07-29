@@ -42,7 +42,10 @@ const AccountInfo = () => {
       </div>
       <Text>Account Balance</Text>
       <Text style={{ fontWeight: 600, marginTop: "10px", fontSize: 18 }}>
-        ${amount}
+        {`$${amount.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`}
       </Text>
     </AccountInfoContainer>
   );
