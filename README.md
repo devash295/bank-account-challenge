@@ -2,7 +2,7 @@
 
 ### Architecture
 
-The architecture for the Bank Challenge project consists of a backend developed in Node.js with Express, using TypeScript, and a frontend built with React and TypeScript, utilizing MUI for styling. MongoDB with Mongoose is used for the database. Docker is employed to containerize the backend and MongoDB.
+The architecture for the Bank Challenge project consists of a backend developed in Node.js with Express, using TypeScript, and a frontend built with React and TypeScript, utilizing MUI for styling. MongoDB Atlas with Mongoose is used for the database.
 
 ## Development
 
@@ -10,6 +10,12 @@ The architecture for the Bank Challenge project consists of a backend developed 
 
 1. **[Install Node.js](https://nodejs.org/en)**
 2. **[Install npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
+
+#### Technologies
+
+1. Node.js with Express (TypeScript)
+2. MongoDB with Mongoose
+3. Running the Backend
 
 ### Backend Development
 
@@ -20,12 +26,6 @@ Build the project using:
 Start the server using:
 
 > `npm run start`
-
-#### Technologies
-
-1. Node.js with Express (TypeScript)
-2. MongoDB with Mongoose
-3. Running the Backend
 
 ### Frontend Development
 
@@ -38,8 +38,7 @@ Start the server using:
 
 To start frontend development, run the following commands in the root directory:
 
-> `npm install`
-> `npm run start`
+> `npm install` > `npm run start`
 
 ### Setting Up Prettier
 
