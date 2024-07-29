@@ -36,8 +36,8 @@ const DateSelector: React.FC<DateSelectorProps> = ({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box display="flex" alignItems="center">
-        <IconButton onClick={handleOpen} style={{ paddingLeft: "0" }}>
+      <Box onClick={handleOpen} display="flex" alignItems="center">
+        <IconButton style={{ paddingLeft: "0" }}>
           <CalendarTodayIcon color={date ? "primary" : "action"} />
         </IconButton>
         <span>{label}</span>

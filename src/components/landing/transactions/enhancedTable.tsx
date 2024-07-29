@@ -14,7 +14,6 @@ import {
 import axios from "axios";
 import TransactionIcon from "../../icons/transactionIcon";
 import { TransactionType } from "../../../types/enums";
-import StatusButton from "./statusButton";
 import { Transaction } from "../../../types/transaction";
 import CustomPagination from "./customPagination";
 
@@ -100,6 +99,7 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
           },
         }
       );
+      console.log("Fetched transactions:", response.data);
       setRows(response.data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -169,7 +169,7 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
                   direction={orderBy === "_id" ? order : "asc"}
                   onClick={() => handleRequestSort("_id")}
                 >
-                  <b>ID Invoice</b>
+                  <b>Transaction ID</b>
                 </TableSortLabel>
               </StyledTableCell>
               <StyledTableCell>
@@ -191,12 +191,13 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
                 </TableSortLabel>
               </StyledTableCell>
               <StyledTableCell>
-                <TableSortLabel
-                  active={orderBy === "amount"}
-                  direction={orderBy === "amount" ? order : "asc"}
-                  onClick={() => handleRequestSort("amount")}
-                >
-                  <b>Amount</b>
+                <TableSortLabel>
+                  <b>Credit</b>
+                </TableSortLabel>
+              </StyledTableCell>
+              <StyledTableCell>
+                <TableSortLabel>
+                  <b>Debit</b>
                 </TableSortLabel>
               </StyledTableCell>
               <StyledTableCell>
@@ -209,12 +210,8 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
                 </TableSortLabel>
               </StyledTableCell>
               <StyledTableCell>
-                <TableSortLabel
-                  active={orderBy === "status"}
-                  direction={orderBy === "status" ? order : "asc"}
-                  onClick={() => handleRequestSort("status")}
-                >
-                  <b>Status</b>
+                <TableSortLabel>
+                  <b>Balance</b>
                 </TableSortLabel>
               </StyledTableCell>
             </StyledTableRow>
@@ -241,7 +238,14 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
                     {row.recipient.name}
                   </div>
                 </StyledTableCell>
-                <StyledTableCell>${row.amount.toFixed(2)}</StyledTableCell>
+                <StyledTableCell>
+                  {row.type !== TransactionType.DEPOSIT &&
+                    `$${row.amount.toFixed(2)}`}
+                </StyledTableCell>
+                <StyledTableCell>
+                  {row.type === TransactionType.DEPOSIT &&
+                    `$${row.amount.toFixed(2)}`}
+                </StyledTableCell>
                 <StyledTableCell>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     {row.type === TransactionType.DEPOSIT ? (
@@ -252,9 +256,7 @@ const EnhancedTable: React.FC<EnhancedTableProps> = ({
                     <span style={{ marginLeft: "8px" }}>{row.type}</span>
                   </div>
                 </StyledTableCell>
-                <StyledTableCell>
-                  <StatusButton status={row.status} />
-                </StyledTableCell>
+                <StyledTableCell>${row.balance}</StyledTableCell>
               </StyledTableRow>
             ))}
           </TableBody>

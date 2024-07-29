@@ -44,7 +44,6 @@ const AccountInfo = () => {
       <Text style={{ fontWeight: 600, marginTop: "10px", fontSize: 18 }}>
         ${amount}
       </Text>
-      {!isMobile && <Text style={{ fontSize: 14 }}>+0.8% than last week</Text>}
     </AccountInfoContainer>
   );
 };

@@ -26,7 +26,7 @@ function App() {
   return (
     <div
       style={{
-        marginTop: "5px",
+        marginTop: "25px",
         minHeight: "100vh",
         width: "100vw",
         display: "flex",

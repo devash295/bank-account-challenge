@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { TransactionType, TransactionStatus } from "../../types/enums";
+import { TransactionType } from "../../types/enums";
 import {
   Box,
   Modal,
@@ -82,35 +82,32 @@ const TransactionModal = (props: TransactionModalProps) => {
   const [loading, setLoading] = useState(false);
 
   const handleCreateTransaction = async () => {
-    if (!IBAN_REGEX.test(iban)) {
+    console.log("Creating transaction...");
+    if (action === TransactionType.TRANSFER && !IBAN_REGEX.test(iban)) {
       setIbanError("Invalid IBAN format.");
       return;
     }
-
+    console.log("Amount:", amount);
     if (amount === null || amount <= 0 || amount > 5000000) {
       setAmountError(
         "Amount must be greater than 0 and less than or equal to 50000."
       );
       return;
     }
-
+    console.log("Amount2:", amount);
     const usersLength = users.length;
-    const statusLength = Object.keys(TransactionStatus).length;
 
     const randomUserIndex = Math.floor(Math.random() * usersLength);
-    const randomStatusIndex = Math.floor(Math.random() * statusLength);
 
     const recipient =
-      action === TransactionType.WITHDRAW
-        ? currentUser
-        : users[randomUserIndex];
-    const status = Object.values(TransactionStatus)[randomStatusIndex];
-
+      action === TransactionType.TRANSFER
+        ? users[randomUserIndex]
+        : currentUser;
+    console.log("Recipient:", recipient);
     const transactionData = {
       date: new Date().toISOString(),
       type: action,
       amount: amount,
-      status: status,
       from: "SomeAccount", // Replace this with actual sender account if needed
       recipient: recipient,
       iban: iban,
@@ -123,6 +120,7 @@ const TransactionModal = (props: TransactionModalProps) => {
         "http://localhost:5000/api/transaction/create",
         transactionData
       );
+      console.log("Transaction created:", response.data);
       toggleOpen();
     } catch (error) {
       console.error("Error creating transaction:", error);
@@ -152,20 +150,22 @@ const TransactionModal = (props: TransactionModalProps) => {
             </IconButton>
           </ModalHeader>
           <ModalBody>
-            <InputContainer>
-              <Typography variant="body1">Account Number/IBAN</Typography>
-              <TextField
-                variant="outlined"
-                fullWidth
-                value={iban}
-                onChange={(e) => {
-                  setIban(e.target.value);
-                  setIbanError("");
-                }}
-                error={!!ibanError}
-                helperText={ibanError}
-              />
-            </InputContainer>
+            {action === TransactionType.TRANSFER && (
+              <InputContainer>
+                <Typography variant="body1">Account Number/IBAN</Typography>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  value={iban}
+                  onChange={(e) => {
+                    setIban(e.target.value);
+                    setIbanError("");
+                  }}
+                  error={!!ibanError}
+                  helperText={ibanError}
+                />
+              </InputContainer>
+            )}
             <InputContainer>
               <Typography variant="body1">Amount</Typography>
               <TextField
